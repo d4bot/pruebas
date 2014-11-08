@@ -1,0 +1,130 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Scopus Search via APIs</title>
+<script>
+var xsl="";
+var xml="";
+
+function loadXMLDoc(dname) {
+	if (window.ActiveXObject) {
+		//alert ("in ActiveXObject condition");
+  		xhttp=new ActiveXObject("Msxml2.XMLHTTP.3.0");
+  	}
+	else {
+		//alert ("in ActiveXObject ELSE condition");
+  		xhttp=new XMLHttpRequest();
+  	}
+
+	xhttp.open("GET",dname,false);
+	xhttp.send("");
+	//alert(xhttp.responseType);
+	//alert(xhttp.responseText);
+	return xhttp.responseXML;
+}
+
+function displayResult()
+{
+	xml="";
+	var key="4bc47d36effffe230fdb766b4e90a380"; // default API key value
+	document.getElementById("sc_results").innerHTML="";
+	
+//alert("in displayResult()");
+var x = document.getElementById("form1");
+var val = x.elements[0].value;
+if(x.elements[1].value != "") {
+	key = x.elements[1].value;
+}
+//alert("search string is: "+val);
+//http://api.elsevier.com/content/search/index:SCOPUS?query=doi%2810.1016/j.fm.2014.08.011%29&sort=coverDate&count=200&apiKey=6fa68fbd63a8a1390b29c4a178f5b6e0&view=complete
+var apiReq="http://api.elsevier.com/content/search/index:SCOPUS?query=all("+val+")&sort=coverDate&count=25&apiKey="+key+"&view=standard&xml-decode=true&httpAccept=application%2Fxml";
+
+if (xsl == "") {
+	xsl=loadXMLDoc("sc_results.xsl");
+}
+
+//alert('getting xml');
+xml=loadXMLDoc(apiReq);
+
+// code for IE
+if (window.ActiveXObject)
+  {
+	var ex='';
+  ex=xml.transformNode(xsl);
+  document.getElementById("sc_results").innerHTML=ex;
+  }
+// code for Mozilla, Firefox, Opera, etc.
+else if (document.implementation && document.implementation.createDocument)
+  {
+  xsltProcessor=new XSLTProcessor();
+  xsltProcessor.importStylesheet(xsl);
+  resultDocument = xsltProcessor.transformToFragment(xml,document);
+  document.getElementById("sc_results").appendChild(resultDocument);
+  }
+
+}
+
+function formReset() {
+	document.getElementById("form1").reset();
+}
+
+function displayPage(link) {
+	xml="";
+	document.getElementById("sc_results").innerHTML="";
+
+var apiReq=link;
+
+if (xsl == "") {
+	xsl=loadXMLDoc("sc_results.xsl");
+}
+
+//alert('getting xml');
+xml=loadXMLDoc(apiReq);
+
+// code for IE
+if (window.ActiveXObject)
+  {
+	var ex='';
+  ex=xml.transformNode(xsl);
+  document.getElementById("sc_results").innerHTML=ex;
+  }
+// code for Mozilla, Firefox, Opera, etc.
+else if (document.implementation && document.implementation.createDocument)
+  {
+  xsltProcessor=new XSLTProcessor();
+  xsltProcessor.importStylesheet(xsl);
+  resultDocument = xsltProcessor.transformToFragment(xml,document);
+  document.getElementById("sc_results").appendChild(resultDocument);
+  }
+
+}
+</script>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-44959676-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<title>Scopus Search API</title>
+</head>
+
+<body onload="formReset();return false;">
+
+<h2>CORS demo: Scopus Search</h2>
+<form id="form1" onkeypress="return event.keyCode != 13;">
+<b>Please enter search keywords separated by space:</b>&nbsp;<input type="text" name="query" style="width:200px"/><br/>
+<b>Please enter your API key:</b>&nbsp;<input type="text" name="apikey" style="width:200px"/></form>
+<input type="submit" onclick="displayResult();return false;" value="Search Scopus" />
+
+<br/>
+<div id="sc_results"></div>
+
+</body>
+</html>
